@@ -14,9 +14,9 @@ section .data				;********CONSTANTES********
 	msjn2 db 'numero 2: '
 	msjres db 13, 10, 'Resultado: '
 	lenmsjres equ $-msjres
-	msjsalir db 13, 10, 10, 'Salir? [Y/n]', 13, 10
-	lenmsjsalir equ $-msjsalir
-	
+	Salir db 13, 10, 10, 'Salir? [Y/n]', 13, 10
+	lenSalir equ $-Salir
+
 section .bss				;********VARIABLES********
 	numero1 resd 1
 	numero2 resd 1
@@ -68,7 +68,7 @@ section .text
 	xor eax, eax
 %endmacro
 
-%macro CadenaANumero 3		;MACRO -> CONVERTIR CADENA A NUMERO (1:Numero 2:Cadena 3:Long Cadena)
+%macro CadenaANumero 3			;MACRO -> CONVERTIR CADENA A NUMERO (1:Numero 2:Cadena 3:Long Cadena)
 	mov esi, [%3]
 	dec esi
 	mov ecx, [%3]
@@ -88,12 +88,12 @@ section .text
 	LOOP cadenaANum%1
 %endmacro
 
-%macro LimpiarCadena 2		;MACRO -> LIMPIAR CADENA (1:Cadena 2:Long Cadena)
-	mov ecx, %2
+%macro LimpiarCadena 2			;MACRO -> LIMPIAR CADENA (1:Cadena 2:Long Cadena)
 	xor eax, eax
 	xor esi, esi
-	cicloLimpiar%1:
 	mov al, ''
+	mov ecx, %2
+	cicloLimpiar%1:
 	mov [%1+esi], al
 	inc esi
 	LOOP cicloLimpiar%1
@@ -108,7 +108,7 @@ section .text
 global _start:
 _start:
 	
-	Inicio:						;SE LIMPIAN TODAS LAS VAR. ANTES DE SEGUIR
+	Inicio:				;SE LIMPIAN TODAS LAS VAR. ANTES DE SEGUIR
 	xor eax, eax
 	mov [numero1], eax
 	mov [numero2], eax
@@ -121,7 +121,7 @@ _start:
 	Output msj1, lenmsj1		;MENSAJE INICIAL & OPCION A REALIZAR
 	Output msjOpc, lenmsjOpc
 	Input opcion, 2
-	mov al, [opcion]			;VERIFICAR OPCION
+	mov al, [opcion]		;VERIFICAR OPCION
 	cmp al, '1'
 	jb Inicio
 	cmp al, '4'
@@ -139,7 +139,7 @@ _start:
 	CadenaANumero numero2, cadena2, longitud2
 	
 
-	mov eax, [numero1]			;REALIZAR OPERACION
+	mov eax, [numero1]		;REALIZAR OPERACION
 	mov ebx, [numero2]
 	mov dl, [opcion]
 	cmp dl, '1'
@@ -151,22 +151,22 @@ _start:
 	cmp dl, '4'
 	je Dividir
 	
-	Sumar:						;SUMA
+	Sumar:				;SUMA
 	add eax, ebx
 	jmp Resultado
-	Restar:						;RESTA
+	Restar:				;RESTA
 	sub eax, ebx
 	jmp procesarResta
-	Multip:						;MULTIPLICACION
+	Multip:				;MULTIPLICACION
 	mul ebx
 	jmp Resultado
-	Dividir:					;DIVISION	
+	Dividir:			;DIVISION	
 	xor edx, edx
 	idiv ebx
 	push edx
 	jmp Resultado
 	
-	procesarResta:				;Procesar Resta por si es negativo
+	procesarResta:			;Procesar Resta por si es negativo
 	cmp eax, 0
 	jg Resultado
 	jl negativo
@@ -180,9 +180,9 @@ _start:
 	
 	Resultado:
 	xor esi, esi
+	mov ebx, 10
 	acadena:
 	xor edx, edx
-	mov ebx, 10
 	idiv ebx
 	add edx, 30h
 	mov [cadenaRes+esi], edx
@@ -191,7 +191,7 @@ _start:
 	jne acadena
 	
 	Invertircadena:
-	mov eax, cadenaRes 			;INVERTIR CADENA (RESULTADO)
+	mov eax, cadenaRes 		;INVERTIR CADENA (RESULTADO)
 	mov esi, 0
 	mov edi, 9
 	mov ecx, 10
@@ -207,13 +207,11 @@ _start:
 	Output signo, 1
 	Output cadenaF, 10
 	
-	;OPCION DE SALIR O CONTINUAR EN EL PROGRAMA
-	
-	Output msjsalir, lenmsjsalir
+	Output Salir, lenSalir 		;OPCION DE SALIR O CONTINUAR
 	Input salir, 2
 	mov al, [salir]
 	cmp al, 'n'
 	je Inicio
 	
-	mov eax, 1					;SALIR	
+	mov eax, 1			;SALIR	
 	int 80h
